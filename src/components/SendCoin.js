@@ -45,15 +45,20 @@ export default class SendCoin extends Component {
 
     render(){
         const store = this.props.store;
+
+        if(!store.fromAccount || store.accounts.length == 0){
+            return null;
+        }
+
         const accounts = this.props.store.accounts;
         const fromAddress = this.props.store.fromAccount.address;
         const accountList = accounts.map((account)=>(
-            <MenuItem value={account} primaryText={account} />
+            <MenuItem value={account.address} primaryText={account.address} />
         ));
 
         return (
             <div>
-                <h1>Send MetaCoin</h1>
+                <h2>Send MetaCoin</h2>
                   
                  <TextField
                     value = {fromAddress}

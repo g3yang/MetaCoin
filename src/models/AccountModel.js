@@ -8,4 +8,8 @@ export default class AccountModel{
         this.address = address;
         this.balance = balance;
     }
+
+    toString(){
+        return `${this.address}: ${this.balance}`;
+    }
 }

@@ -6,10 +6,7 @@ import AccountModel from './AccountModel';
 
 export default class Store {
    @observable accounts=[];
-   @observable fromAccount = {
-       address: null,
-       balance: 0
-   };
+   @observable fromAccount;
    @observable toAddress = '';
    @observable amount = 0;
    
@@ -24,17 +21,23 @@ export default class Store {
        const contract = require('truffle-contract');
        const metaCoin = contract(MetaCoin);
        metaCoin.setProvider(web3.currentProvider);
-       return web3.eth.getAccounts((errors, accounts)=>{
-         var fromAddress = accounts[0];
-         self.accounts = accounts;
-         self.toAddress = accounts[1];
+       return web3.eth.getAccounts((errors, addresses)=>{
+         var fromAddress = addresses[0];
+         addresses.forEach(address=>{
+            const account = new AccountModel(address); 
+            self.accounts.push(account);
+         });
+
+         self.fromAccount = self.accounts[0];
+         self.toAddress = addresses[1];
          metaCoin.deployed().then(instance=>{
              self.contractInstance = instance;
-             return instance.getBalance.call(fromAddress, {from: fromAddress});
-         }).then(result=>{
-             const balance = result.c;
-             self.fromAccount.address = fromAddress;
-             self.fromAccount.balance = balance;
+             self.accounts.forEach(account=>{
+                 instance.getBalance.call(account.address, {from:fromAddress}).then(result=>{
+                     account.balance = result.c;
+                     console.log(account.toString());
+                 });
+             });
          });
        });
      });
@@ -50,10 +53,12 @@ export default class Store {
    }
 
    refreshBalances(){
-     const fromAddress = this.fromAccount.address;   
-     this.contractInstance.getBalance.call(fromAddress, {from:fromAddress}).then(result=>{
-         this.fromAccount.balance = result.c
-     });
+    this.accounts.forEach(account=>{
+        this.contractInstance.getBalance.call(account.address, {from:this.fromAccount.address}).then(result=>{
+            account.balance = result.c;
+            console.log(account.toString());
+        });
+    });
    }
    
 }
