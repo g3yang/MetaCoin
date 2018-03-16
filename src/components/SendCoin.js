@@ -83,6 +83,9 @@ export default class SendCoin extends Component {
                 <br/>
 
                 <RaisedButton label="Send Coin" primary={true} style={styles.button} onClick={this.sendCoin.bind(this)} />
+
+                <br/>
+                {store.status}
                 
                 <br/><br/>
             </div>
